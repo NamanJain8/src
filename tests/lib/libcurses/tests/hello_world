@@ -1,0 +1,16 @@
+include start
+assign msg "hello world"
+call win newwin 10 20 2 5
+check win NON_NULL
+call OK wprintw $win "%s" $msg
+call OK wrefresh $win
+
+call OK printw "%s" $msg
+call OK refresh
+
+#call tmp mvprintw 2 3 "%s" $msg
+#check tmp OK
+#call OK refresh
+
+call OK mvwprintw $win 3 3 "%s" $msg
+call OK refresh

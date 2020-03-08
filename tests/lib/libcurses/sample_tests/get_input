@@ -1,0 +1,43 @@
+include start
+
+# basic usage of assignment and input
+assign check0 "Hello World"
+input "Hello World\n"
+call2 OK $check0 getnstr 20
+
+assign check1 "Hell"
+input "Hello World\n"
+call2 OK $check1 getnstr 5
+
+# this happens in nocbreak mode
+call OK noecho
+input "abcd\n"
+call 0x61 getch
+noinput
+call 0x62 getch
+noinput
+call 0x63 getch
+noinput
+call 0x64 getch
+noinput
+call 0x0a getch
+
+# enter cbreak mode
+input "e"
+call OK cbreak
+call 0x65 getch
+
+
+delay 2000
+input "a"
+call 97 getch
+call OK timeout 100
+input "baaa"
+# since delay is in effect and we set timeout the following getch should
+# return ERR not the character b.
+call -1 getch
+# drain input....
+call OK drain
+delay 0
+input "a"
+call 97 getch
