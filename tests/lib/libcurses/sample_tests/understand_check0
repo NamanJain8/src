@@ -1,0 +1,4 @@
+include start
+call OK addch `\001t`
+call OK refresh
+compare understand_check0.chk

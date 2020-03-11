@@ -76,4 +76,5 @@ then
 	exit 1
 fi
 #
+echo ${BASEDIR}/director ${ARGS} -s ${SLAVE} "${INCLUDE_PATH}/$1"
 exec ${BASEDIR}/director ${ARGS} -s ${SLAVE} "${INCLUDE_PATH}/$1"

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	start_color();			/* Start color 			*/
-	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(1, COLOR_RED, COLOR_GREEN);
 
 	attron(COLOR_PAIR(1));
 	print_in_middle(stdscr, LINES / 2, 0, 0, "Viola !!! In color ...");

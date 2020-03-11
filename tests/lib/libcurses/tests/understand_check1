@@ -1,0 +1,7 @@
+include start
+call OK move 14 15
+call OK printw "%s" "Hello World"
+call OK move 14 16
+call OK printw "%s" "Hello World"
+call OK refresh
+compare understand_check1.chk

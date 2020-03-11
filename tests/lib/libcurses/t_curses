@@ -764,13 +764,46 @@ check_output_body()
         h_run check_output
 }
 
+atf_test_case add_wch
+add_wch_head()
+{
+        atf_set "descr" "Adding wch"
+}
+add_wch_body()
+{
+        h_run add_wch
+}
+
+atf_test_case understand_check0
+understand_check0_head()
+{
+        atf_set "descr" "Understanding check 0"
+}
+understand_check0_body()
+{
+        h_run understand_check0
+}
+
+atf_test_case understand_check1
+understand_check1_head()
+{
+        atf_set "descr" "Understanding check 0"
+}
+understand_check1_body()
+{
+        h_run understand_check1
+}
+
 
 atf_init_test_cases()
 {
 	atf_add_test_case startup
-	atf_add_test_case addch
-	atf_add_test_case hello_world
+	# atf_add_test_case addch
+	atf_add_test_case add_wch
+	# atf_add_test_case hello_world
 	# atf_add_test_case get_input
+	# atf_add_test_case understand_check0
+	# atf_add_test_case understand_check1
 	# atf_add_test_case check_output
 	# atf_add_test_case addchstr
 	# atf_add_test_case addchnstr
