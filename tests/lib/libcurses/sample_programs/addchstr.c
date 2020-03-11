@@ -6,8 +6,11 @@
 
 int main(void) {
 	initscr();
-	move(14,15);
-	printw("Hello World\n");
+	move(2,2);
+	addstr("teest");
+	refresh();
+	move(2,4);
+	delch();
 	refresh();
     return EXIT_SUCCESS;
 }

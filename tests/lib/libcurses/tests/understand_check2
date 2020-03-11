@@ -1,0 +1,8 @@
+include start
+call OK move 14 14
+call OK add_wch `\000\000\000\001\000H`
+call2 14 15 getyx STDSCR
+call OK add_wch `\000\000\000\001\000H`
+call OK add_wch `\000\000\000\001\000H`
+call OK refresh
+compare understand_check2.chk
