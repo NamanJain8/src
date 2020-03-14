@@ -1,0 +1,4 @@
+include start
+call OK echo_wchar `\001\000\000\000\000H`
+call OK echo_wchar `\000\000\000\000\000H`
+compare echo_wchar.chk

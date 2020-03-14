@@ -6173,13 +6173,6 @@ cmd_wadd_wch(int nargs, char **args)
 	ch = (cchar_t *) args[1];
 	report_count(1);
 	report_return(wadd_wch(win, ch));
-	// report_return(wadd_wch(win, ch));
-
-	// if (check_arg_count(nargs, 1) == 1)
-	// 	return;
-
-	// report_count(1);
-	// report_error("UNSUPPORTED");
 }
 
 
@@ -6390,8 +6383,10 @@ cmd_echo_wchar(int nargs, char **args)
 	if (check_arg_count(nargs, 1) == 1)
 		return;
 
+	cchar_t *ch = (cchar_t *) args[0];
+
 	report_count(1);
-	report_error("UNSUPPORTED");
+	report_return(echo_wchar(ch));
 }
 
 
