@@ -824,13 +824,24 @@ insch_body()
         h_run insch
 }
 
+atf_test_case wadd_wch
+wadd_wch_head()
+{
+        atf_set "descr" "Test wide character window add"
+}
+wadd_wch_body()
+{
+        h_run wadd_wch
+}
+
 atf_init_test_cases()
 {
 	atf_add_test_case startup
+	atf_add_test_case wadd_wch
 	# atf_add_test_case delch
-	atf_add_test_case insch
+	# atf_add_test_case insch
 	# atf_add_test_case addch
-	# atf_add_test_case add_wch
+	atf_add_test_case add_wch
 	# atf_add_test_case hello_world
 	# atf_add_test_case get_input
 	# atf_add_test_case understand_check0

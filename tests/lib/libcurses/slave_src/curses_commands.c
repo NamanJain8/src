@@ -6157,12 +6157,29 @@ cmd_add_wch(int nargs, char **args)
 
 void
 cmd_wadd_wch(int nargs, char **args)
-{
-	if (check_arg_count(nargs, 1) == 1)
+{	
+	cchar_t *ch;
+	WINDOW* win;
+
+	if (check_arg_count(nargs, 2) == 1)
 		return;
 
+	if (sscanf(args[0], "%p", &win) == 0) {
+		report_count(1);
+		report_error("BAD ARGUMENT");
+		return;
+	}
+
+	ch = (cchar_t *) args[1];
 	report_count(1);
-	report_error("UNSUPPORTED");
+	report_return(wadd_wch(win, ch));
+	// report_return(wadd_wch(win, ch));
+
+	// if (check_arg_count(nargs, 1) == 1)
+	// 	return;
+
+	// report_count(1);
+	// report_error("UNSUPPORTED");
 }
 
 

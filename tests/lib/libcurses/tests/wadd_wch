@@ -1,0 +1,19 @@
+include start
+call win newwin 14 20 2 5
+check win NON_NULL
+call OK wmove $win 2 14
+call2 2 14 getyx $win
+call OK wadd_wch $win `\000\000\000\001\000H`
+call OK wrefresh $win
+compare wadd_wch1.chk
+call OK wmove $win 3 19
+call OK wadd_wch $win `\000\000\000\001\000H`
+call2 4 0 getyx $win
+call OK wrefresh $win
+call OK wadd_wch $win `\000\000\000\001\000H`
+call2 4 1 getyx $win
+call OK wrefresh $win
+call OK wadd_wch $win `\000\000\000\001\000H`
+call OK wrefresh $win
+compare wadd_wch2.chk
+call2 4 2 getyx $win

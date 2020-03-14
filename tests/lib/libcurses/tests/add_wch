@@ -14,13 +14,7 @@ call2 15 0 getyx STDSCR
 call OK add_wch `\000\000\000\001\000H`
 call2 15 1 getyx STDSCR
 call OK refresh
-call OK add_wch `\000\000\000\001\000H`
-call OK add_wch `\000\000\000\001\000H`
-call OK add_wch `\000\000\000\001\000H`
-call OK add_wch `\000\000\000\001\000H`
-call OK add_wch `\000\000\000\001\000H`
-call OK add_wch `\000\000\000\001\000H`
-call OK add_wch `\000\000\000\001\000H`
+call OK add_wch `\003\000\000\001\000H`
 call OK refresh
 compare add_wch2.chk
-call2 15 8 getyx STDSCR
+call2 15 2 getyx STDSCR
