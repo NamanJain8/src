@@ -58,6 +58,7 @@ int cmdpipe[2];		/* command pipe between director and slave */
 int slvpipe[2];		/* reply pipe back from slave */
 int master;		/* pty to the slave */
 int verbose;		/* control verbosity of tests */
+int check_file_flag;		/* control checkfile generation */
 const char *check_path;	/* path to prepend to check files for output
 			   validation */
 const char *include_path;	/* path to prepend to include files */
@@ -129,8 +130,9 @@ main(int argc, char *argv[])
 
 	termpath = term = slave = NULL;
 	verbose = 0;
+	check_file_flag = 0;
 
-	while ((ch = getopt(argc, argv, "vC:I:p:s:t:T:")) != -1) {
+	while ((ch = getopt(argc, argv, "vgGC:I:p:s:t:T:")) != -1) {
 		switch(ch) {
 		case 'I':
 			include_path = optarg;
@@ -152,6 +154,12 @@ main(int argc, char *argv[])
 			break;
 		case 'v':
 			verbose = 1;
+			break;
+		case 'g':
+			check_file_flag = 1;
+			break;
+		case 'G':
+			check_file_flag = 2;
 			break;
 		case '?':
 		default:

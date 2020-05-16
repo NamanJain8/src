@@ -8,7 +8,7 @@ INCLUDE_PATH="${BASEDIR}/tests/"
 export INCLUDE_PATH
 #
 CURSES_TRACE_FILE="/tmp/ctrace"
-SLAVE="${BASEDIR}/slave"
+SLAVE="${BASEDIR}/slave/slave"
 
 usage() {
 	echo "Set up the environment to run the test frame.  Option flags:"
@@ -28,7 +28,7 @@ usage() {
 }
 
 #
-ARGS=""
+ARGS="-T ${BASEDIR} -I ${INCLUDE_PATH} -C ${CHECK_PATH}"
 #
 while getopts cf:L:s:v opt
 do
@@ -54,7 +54,7 @@ do
 	    ;;
 
 	v)
-	    ARGS="-v"
+	    ARGS="-v ${ARGS}"
 	    ;;
 
 	\?)
@@ -76,4 +76,4 @@ then
 	exit 1
 fi
 #
-exec ${BASEDIR}/director ${ARGS} -s ${SLAVE} "${INCLUDE_PATH}/$1"
+exec ${BASEDIR}/director/director ${ARGS} -s ${SLAVE} "${INCLUDE_PATH}/$1"
