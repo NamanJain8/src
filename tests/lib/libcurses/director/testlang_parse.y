@@ -1004,13 +1004,13 @@ compare_streams(char *filename, bool discard)
 	    >= sizeof(check_file))
 		err(2, "Path to check file path overflowed");
 	
-	if(check_file_flag == 2){
+	if(check_file_flag == 0x3){
 		create_check_file(check_file);
 		return;
 	}
 
 	if ((check_fd = open(check_file, O_RDONLY, 0)) < 0){
-		if(check_file_flag == 1){
+		if(check_file_flag == 0x1){
 			create_check_file(check_file);
 			return;
 		}

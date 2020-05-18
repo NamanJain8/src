@@ -132,7 +132,7 @@ main(int argc, char *argv[])
 	verbose = 0;
 	check_file_flag = 0;
 
-	while ((ch = getopt(argc, argv, "vgGC:I:p:s:t:T:")) != -1) {
+	while ((ch = getopt(argc, argv, "vgfC:I:p:s:t:T:")) != -1) {
 		switch(ch) {
 		case 'I':
 			include_path = optarg;
@@ -156,10 +156,10 @@ main(int argc, char *argv[])
 			verbose = 1;
 			break;
 		case 'g':
-			check_file_flag = 1;
+			check_file_flag |= 0x1;
 			break;
-		case 'G':
-			check_file_flag = 2;
+		case 'f':
+			check_file_flag |= 0x2;
 			break;
 		case '?':
 		default:
