@@ -45,6 +45,7 @@
 #include <vis.h>
 #include <stdint.h>
 #include "returns.h"
+#include "flags.h"
 
 #define YYDEBUG 1
 
@@ -133,7 +134,6 @@ static void	write_cmd_pipe_args(data_enum_t, void *);
 static void	read_cmd_pipe(ct_data_t *);
 static void	write_func_and_args(void);
 static void	compare_streams(char *, bool);
-static void create_check_file(char *);
 static void	do_function_call(size_t);
 static void	save_slave_output(bool);
 static void	validate_type(data_enum_t, ct_data_t *, int);
@@ -892,86 +892,6 @@ static int check_function_table(char *function, const char *table[],
 }
 
 /*
- * Generate a check file from the slave output on COMPARE testframe
- * command.
- */
-static void
-create_check_file(char *check_file)
-{
-	char ref, data;
-	struct pollfd fds[2];
-	int nfd, check_fd;
-	ssize_t result;
-	size_t offs;
-
-	/*
-	 * Check File name now is absolute
-	 */
-
-	if ((check_fd = open(check_file, O_WRONLY | O_CREAT, 0644)) < 0){
-		err(2, "failed to create file %s line %zu of file %s",
-		    check_file, line, cur_file);
-	}
-
-	fds[0].fd = check_fd;
-	fds[0].events = POLLOUT;
-	fds[1].fd = master;
-	fds[1].events = POLLIN;
-
-	nfd = 2;
-	/*
-	 * if we have saved output then only insert the to the check file
-	 * since the slave data may already be drained.
-	 */
-	if (saved_output.count > 0)
-		nfd = 1;
-
-	offs = 0;
-	while (poll(fds, nfd, 500) == nfd) {
-
-		if (saved_output.count > 0) {
-			data = saved_output.data[saved_output.readp];
-			saved_output.count--;
-			saved_output.readp++;
-			/* run out of saved data, switch to file */
-			if (saved_output.count == 0)
-				nfd = 2;
-		} else {
-			if (fds[0].revents & POLLOUT) {
-				if (read(master, &data, 1) < 1)
-					err(2, "Bad read on slave pty");
-			} else
-				continue;
-		}
-
-		if ((result = write(check_fd, &data, 1)) < 1) {
-			if (result != 0) {
-				err(2,
-					"Bad write on file %s", check_file);
-			}
-		}
-		else
-			ref = data;
-
-		if (verbose) {
-			fprintf(stderr, "Saving reference byte 0x%x (%c)"
-				" against slave byte 0x%x (%c)\n",
-				ref, (ref >= ' ') ? ref : '-',
-				data, (data >= ' ' )? data : '-');
-		}
-
-		offs++;
-	}
-
-	if (saved_output.count > 0)
-		err(2, "Slave output not flushed correctly");
-
-	saved_output.readp = 0;
-
-	close(check_fd);
-}
-
-/*
  * Compare the output from the slave against the given file and report
  * any differences.
  */
@@ -1004,22 +924,27 @@ compare_streams(char *filename, bool discard)
 	    >= sizeof(check_file))
 		err(2, "Path to check file path overflowed");
 	
-	if(check_file_flag == 0x3){
-		create_check_file(check_file);
-		return;
-	}
+	int create_check_file = 0;
 
-	if ((check_fd = open(check_file, O_RDONLY, 0)) < 0){
-		if(check_file_flag == 0x1){
-			create_check_file(check_file);
-			return;
-		}
-		err(2, "failed to open file %s line %zu of file %s",
-		    check_file, line, cur_file);
+	if((check_file_flag == (GEN_CHECK_FILE | FORCE_GEN)))
+		create_check_file = 1;
+	else if ((check_fd = open(check_file, O_RDONLY, 0)) < 0){ 
+		if(check_file_flag & GEN_CHECK_FILE)
+			create_check_file = 1;
+		else
+			err(2, "failed to open file %s line %zu of file %s",
+				check_file, line, cur_file);
+	}
+	
+
+	if(create_check_file)
+		if ((check_fd = open(check_file, O_WRONLY | O_CREAT, 0644)) < 0){
+			err(2, "failed to create file %s line %zu of file %s",
+				check_file, line, cur_file);
 	}
 
 	fds[0].fd = check_fd;
-	fds[0].events = POLLIN;
+	fds[0].events = create_check_file ? POLLOUT:POLLIN;
 	fds[1].fd = master;
 	fds[1].events = POLLIN;
 
@@ -1033,13 +958,16 @@ compare_streams(char *filename, bool discard)
 
 	offs = 0;
 	while (poll(fds, nfd, 500) == nfd) {
-		if (fds[0].revents & POLLIN) {
-			if ((result = read(check_fd, &ref, 1)) < 1) {
-				if (result != 0) {
-					err(2,
-					    "Bad read on file %s", check_file);
-				} else {
-					break;
+		/* Read from check file if doing comparison */
+		if(!create_check_file){
+			if (fds[0].revents & POLLIN) {
+				if ((result = read(check_fd, &ref, 1)) < 1) {
+					if (result != 0) {
+						err(2,
+							"Bad read on file %s", check_file);
+					} else {
+						break;
+					}
 				}
 			}
 		}
@@ -1052,21 +980,39 @@ compare_streams(char *filename, bool discard)
 			if (saved_output.count == 0)
 				nfd = 2;
 		} else {
-			if (fds[0].revents & POLLIN) {
+			int revent = (create_check_file == 1) ? POLLOUT:POLLIN; 
+			if (fds[0].revents & revent) {
 				if (read(master, &data, 1) < 1)
 					err(2, "Bad read on slave pty");
 			} else
 				continue;
 		}
 
-		if (verbose) {
-			fprintf(stderr, "Comparing reference byte 0x%x (%c)"
-				" against slave byte 0x%x (%c)\n",
-				ref, (ref >= ' ') ? ref : '-',
-				data, (data >= ' ' )? data : '-');
+		if(create_check_file){
+			if ((result = write(check_fd, &data, 1)) < 1) {
+				if (result != 0) {
+					err(2,
+						"Bad write on file %s", check_file);
+				}
+			}
+			else
+				ref = data;
 		}
 
-		if (ref != data) {
+		if (verbose) {
+			if(create_check_file)
+				fprintf(stderr, "Saving reference byte 0x%x (%c)"
+					" against slave byte 0x%x (%c)\n",
+					ref, (ref >= ' ') ? ref : '-',
+					data, (data >= ' ' )? data : '-');
+			else
+				fprintf(stderr, "Comparing reference byte 0x%x (%c)"
+					" against slave byte 0x%x (%c)\n",
+					ref, (ref >= ' ') ? ref : '-',
+					data, (data >= ' ' )? data : '-');
+		}
+
+		if (!create_check_file && ref != data) {
 			errx(2, "%s, %zu: refresh data from slave does "
 			    "not match expected from file %s offs %zu "
 			    "[reference 0x%x (%c) != slave 0x%x (%c)]",
@@ -1078,10 +1024,17 @@ compare_streams(char *filename, bool discard)
 		offs++;
 	}
 
-
-	if (saved_output.count > 0)
-		excess(cur_file, line, __func__, " from slave",
-		    &saved_output.data[saved_output.readp], saved_output.count);
+	/*
+	 * if creating a check file, there shouldn't be 
+	 * anymore saved output 
+	 */
+	if (saved_output.count > 0){
+		if(create_check_file)
+			err(2, "Slave output not flushed correctly");
+		else
+			excess(cur_file, line, __func__, " from slave",
+				&saved_output.data[saved_output.readp], saved_output.count);
+	}
 
 	/* discard any excess saved output if required */
 	if (discard) {
@@ -1089,7 +1042,7 @@ compare_streams(char *filename, bool discard)
 		saved_output.readp = 0;
 	}
 
-	if ((result = poll(fds, 2, 0)) != 0) {
+	if (!create_check_file && (result = poll(fds, 2, 0)) != 0) {
 		if (result == -1)
 			err(2, "poll of file descriptors failed");
 

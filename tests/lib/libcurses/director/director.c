@@ -43,6 +43,7 @@
 #include <util.h>
 #include <err.h>
 #include "returns.h"
+#include "flags.h"
 
 void yyparse(void);
 #define DEF_TERMPATH "."
@@ -99,11 +100,13 @@ slave_died(int param)
 static void
 usage(void)
 {
-	fprintf(stderr, "Usage: %s [-v] [-I include-path] [-C check-path] "
+	fprintf(stderr, "Usage: %s [-vgf] [-I include-path] [-C check-path] "
 	    "[-T terminfo-file] [-s pathtoslave] [-t term] "
 	    "commandfile\n", getprogname());
 	fprintf(stderr, " where:\n");
 	fprintf(stderr, "    -v enables verbose test output\n");
+	fprintf(stderr, "    -g enables generation of check file if does not exist\n");
+	fprintf(stderr, "    -f forces generation of check file if -g flag enabled\n");
 	fprintf(stderr, "    -T is a directory containing the terminfo.cdb "
 	    "file, or a file holding the terminfo description n");
 	fprintf(stderr, "    -s is the path to the slave executable\n");
@@ -156,10 +159,10 @@ main(int argc, char *argv[])
 			verbose = 1;
 			break;
 		case 'g':
-			check_file_flag |= 0x1;
+			check_file_flag |= GEN_CHECK_FILE;
 			break;
 		case 'f':
-			check_file_flag |= 0x2;
+			check_file_flag |= FORCE_GEN;
 			break;
 		case '?':
 		default:
